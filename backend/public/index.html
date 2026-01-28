@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pastebin Lite</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #f4f6f8;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      background: #ffffff;
+      width: 420px;
+      padding: 24px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #333;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    textarea {
+      width: 100%;
+      resize: none;
+      padding: 10px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 14px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    #result {
+      margin-top: 16px;
+      font-size: 14px;
+      word-break: break-all;
+    }
+
+    #result a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    #result a:hover {
+      text-decoration: underline;
+    }
+
+    .note {
+      margin-top: 10px;
+      font-size: 12px;
+      color: #777;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>Pastebin Lite</h2>
+
+    <label for="content">Paste Content</label>
+    <textarea id="content" rows="6" placeholder="Enter your text here..."></textarea>
+
+    <label for="ttl">TTL (seconds, optional)</label>
+    <input type="number" id="ttl" placeholder="e.g. 60">
+
+    <label for="views">Max Views (optional)</label>
+    <input type="number" id="views" placeholder="e.g. 5">
+
+    <button onclick="createPaste()">Create Paste</button>
+
+    <div id="result"></div>
+
+    </div>
+  </div>
+
+  <script>
+    async function createPaste() {
+      const content = document.getElementById("content").value.trim();
+      const ttl = document.getElementById("ttl").value;
+      const views = document.getElementById("views").value;
+
+      if (!content) {
+        document.getElementById("result").innerText =
+          "Content cannot be empty.";
+        return;
+      }
+
+      const body = { content };
+
+      if (ttl) body.ttl_seconds = Number(ttl);
+      if (views) body.max_views = Number(views);
+
+      const res = await fetch("/api/pastes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json();
+
+      if (data.url) {
+        document.getElementById("result").innerHTML =
+          `Paste created:<br><a href="${data.url}" target="_blank">${data.url}</a>`;
+      } else {
+        document.getElementById("result").innerText =
+          JSON.stringify(data);
+      }
+    }
+  </script>
+
+</body>
+</html>
